@@ -1,6 +1,5 @@
 package org.saad.vetsphereai.controller;
 
-
 import org.saad.vetsphereai.dto.AuthResponse;
 import org.saad.vetsphereai.dto.LoginRequest;
 import org.saad.vetsphereai.dto.RegisterRequest;
@@ -19,6 +18,11 @@ public class AuthController {
         this.userService = userService;
     }
 
+    @PostMapping("/register")
+    public User register(@RequestBody RegisterRequest request) {
+        return userService.register(request);
+    }
+
     @PostMapping("/login")
     public AuthResponse login(@RequestBody LoginRequest request) {
         return userService.login(request);
@@ -30,44 +34,7 @@ public class AuthController {
     }
 
     @GetMapping("/me")
-    public User me(Authentication authentication){
+    public User me(Authentication authentication) {
         return userService.getCurrentUser(authentication.getName());
     }
-
-    @RestController
-    @RequestMapping("/api/admin")
-    public class AdminController {
-        @GetMapping("/dashboard")
-        public String dashboard() {
-            return "Welcome Admin";
-        }
-    }
-
-    @RestController
-    @RequestMapping("/api/veterinarian")
-    public class DoctorController {
-
-        @GetMapping("/dashboard")
-        public String dashboard() {
-            return "Welcome Doctor";
-        }
-    }
-
-    @RestController
-    @RequestMapping("/api/pet_owner")
-    public class OwnerController {
-
-        @GetMapping("/dashboard")
-        public String dashboard() {
-            return "Welcome Owner";
-        }
-    }
-
-
-
-    @PostMapping("/register")
-    public User register(@RequestBody RegisterRequest request) {
-        return userService.register(request);
-    }
-
-}
+}
