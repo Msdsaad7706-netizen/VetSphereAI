@@ -34,10 +34,16 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                        .requestMatchers("/api/dashboard/**").permitAll()
+                        .requestMatchers("/api/ai/**").permitAll()
+                        .requestMatchers("/api/ml/**").permitAll()
                         .requestMatchers("/api/admin", "/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/medical-records", "/api/medical-records/**").hasAnyRole("VETERINARIAN", "ADMIN")
+                        .requestMatchers("/api/prescriptions/**").hasAnyRole("PET_OWNER", "VETERINARIAN", "ADMIN")
+                        .requestMatchers("/api/vaccinations/**").hasAnyRole("PET_OWNER", "VETERINARIAN", "ADMIN")
                         .requestMatchers("/api/veterinarians", "/api/veterinarians/**").hasAnyRole("PET_OWNER", "VETERINARIAN", "ADMIN")
-                       .requestMatchers("/api/appointments", "/api/appointments/**").authenticated()
-//                        .hasAnyRole("PET_OWNER", "VETERINARIAN", "ADMIN")
+                        .requestMatchers("/api/appointments", "/api/appointments/**").authenticated()
                         .requestMatchers("/api/pets", "/api/pets/**").hasAnyRole("PET_OWNER", "VETERINARIAN", "ADMIN")
                         .anyRequest().authenticated())
                 .exceptionHandling(ex -> ex
@@ -80,4 +86,3 @@ public class SecurityConfig {
         return configuration.getAuthenticationManager();
     }
 }
-

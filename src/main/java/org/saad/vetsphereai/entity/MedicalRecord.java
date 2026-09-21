@@ -16,10 +16,28 @@ public class MedicalRecord {
     @JoinColumn(name = "veterinarian_id",nullable = false)
     private Veterinarian veterinarian;
 
+    @ManyToOne
+    @JoinColumn(name = "pet_id")
+    private Pet pet;
+
+//    public MedicalRecord(Pet pet) {
+//        this.pet = pet;
+//    }
+
+
+    public Pet getPet() {
+        return pet;
+    }
+
+    public void setPet(Pet pet) {
+        this.pet = pet;
+    }
+
     @Column(nullable = false)
     private String diagnosis;
     private String treatment;
     private String notes;
+
 
     @Column(nullable = false)
     private LocalDateTime recordDate;
@@ -74,4 +92,5 @@ public class MedicalRecord {
     public void setRecordDate(LocalDateTime recordDate) {
         this.recordDate = recordDate;
     }
+
 }

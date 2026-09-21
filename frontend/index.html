@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VetSphereAI - NextGen Veterinary Intelligence Platform</title>
+
+  <!-- Google Fonts & Chart.js -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <div id="app-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="brand-header">
+        <div class="brand-logo">🐾</div>
+        <div>
+          <div class="brand-title">VetSphereAI</div>
+          <div class="brand-subtitle">Clinical Intelligence</div>
+        </div>
+      </div>
+
+      <ul class="nav-menu">
+        <li class="nav-item active" data-tab="dashboard">
+          <button onclick="switchTab('dashboard')">
+            <span class="nav-icon">📊</span> Dashboard & Analytics
+          </button>
+        </li>
+        <li class="nav-item" data-tab="pets">
+          <button onclick="switchTab('pets')">
+            <span class="nav-icon">🐶</span> Pet Directory
+          </button>
+        </li>
+        <li class="nav-item" data-tab="appointments">
+          <button onclick="switchTab('appointments')">
+            <span class="nav-icon">📅</span> Appointments
+          </button>
+        </li>
+        <li class="nav-item" data-tab="prescriptions">
+          <button onclick="switchTab('prescriptions')">
+            <span class="nav-icon">💊</span> Prescription Module
+          </button>
+        </li>
+        <li class="nav-item" data-tab="vaccinations">
+          <button onclick="switchTab('vaccinations')">
+            <span class="nav-icon">💉</span> Vaccination Tracker
+          </button>
+        </li>
+        <li class="nav-item" data-tab="ai-advisor">
+          <button onclick="switchTab('ai-advisor')">
+            <span class="nav-icon">🤖</span> Spring AI Advisor
+          </button>
+        </li>
+        <li class="nav-item" data-tab="ml-predictor">
+          <button onclick="switchTab('ml-predictor')">
+            <span class="nav-icon">🧠</span> ML Risk Engine
+          </button>
+        </li>
+        <li class="nav-item">
+          <button onclick="window.open('http://localhost:8080/swagger-ui.html', '_blank')">
+            <span class="nav-icon">📖</span> Swagger OpenAPI ↗
+          </button>
+        </li>
+      </ul>
+
+      <div class="user-profile-badge">
+        <div class="user-avatar" id="user-avatar-initials">DR</div>
+        <div class="user-info">
+          <div class="user-name" id="user-display-name">Dr. Sarah Vance</div>
+          <div class="user-role" id="user-display-role">Senior Veterinarian</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <!-- Top Bar -->
+      <header class="top-bar">
+        <h1 class="page-title" id="current-tab-title">
+          <span>📊</span> Dashboard & Analytics
+        </h1>
+        <div class="top-actions">
+          <button class="btn btn-outline" onclick="openLoginModal()">🔑 Auth Login</button>
+          <button class="btn btn-primary" onclick="openQuickActionModal()">⚡ Quick Action</button>
+        </div>
+      </header>
+
+      <!-- TAB 1: DASHBOARD -->
+      <section id="tab-dashboard" class="tab-page">
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <div class="metric-icon icon-purple">🐶</div>
+            <div class="metric-info">
+              <div class="val" id="dash-total-pets">24</div>
+              <div class="lbl">Registered Pets</div>
+            </div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-icon icon-cyan">📅</div>
+            <div class="metric-info">
+              <div class="val" id="dash-total-appointments">18</div>
+              <div class="lbl">Total Appointments</div>
+            </div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-icon icon-emerald">💊</div>
+            <div class="metric-info">
+              <div class="val" id="dash-active-prescriptions">12</div>
+              <div class="lbl">Active Prescriptions</div>
+            </div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-icon icon-amber">💉</div>
+            <div class="metric-info">
+              <div class="val" id="dash-due-vaccines">5</div>
+              <div class="lbl">Vaccines Due Soon</div>
+            </div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-icon icon-rose">🚨</div>
+            <div class="metric-info">
+              <div class="val" id="dash-overdue-vaccines">2</div>
+              <div class="lbl">Overdue Vaccines</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="charts-grid">
+          <div class="glass-panel">
+            <div class="panel-header">
+              <h3 class="panel-title">📈 Appointment Status Distribution</h3>
+            </div>
+            <canvas id="appointmentsChart" height="220"></canvas>
+          </div>
+          <div class="glass-panel">
+            <div class="panel-header">
+              <h3 class="panel-title">🐾 Pets Species Breakdown</h3>
+            </div>
+            <canvas id="speciesChart" height="220"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 2: PETS -->
+      <section id="tab-pets" class="tab-page" style="display: none;">
+        <div class="glass-panel">
+          <div class="panel-header">
+            <h3 class="panel-title">🐶 Pet Directory</h3>
+            <button class="btn btn-emerald" onclick="openAddPetModal()">+ Add New Pet</button>
+          </div>
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Pet Name</th>
+                  <th>Species</th>
+                  <th>Breed</th>
+                  <th>Age</th>
+                  <th>Gender</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="pets-table-body">
+                <!-- Dynamically Populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 3: APPOINTMENTS -->
+      <section id="tab-appointments" class="tab-page" style="display: none;">
+        <div class="glass-panel">
+          <div class="panel-header">
+            <h3 class="panel-title">📅 Appointment Schedule</h3>
+            <button class="btn btn-primary" onclick="openBookAppointmentModal()">+ Book Appointment</button>
+          </div>
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Pet</th>
+                  <th>Veterinarian</th>
+                  <th>Date & Time</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="appointments-table-body">
+                <!-- Dynamically Populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 4: PRESCRIPTIONS -->
+      <section id="tab-prescriptions" class="tab-page" style="display: none;">
+        <div class="glass-panel">
+          <div class="panel-header">
+            <h3 class="panel-title">💊 Prescription Management</h3>
+            <button class="btn btn-emerald" onclick="openIssuePrescriptionModal()">+ Issue Prescription</button>
+          </div>
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Pet</th>
+                  <th>Medicine</th>
+                  <th>Dosage</th>
+                  <th>Frequency</th>
+                  <th>Duration</th>
+                  <th>Status</th>
+                  <th>Veterinarian</th>
+                </tr>
+              </thead>
+              <tbody id="prescriptions-table-body">
+                <!-- Dynamically Populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 5: VACCINATIONS -->
+      <section id="tab-vaccinations" class="tab-page" style="display: none;">
+        <div class="glass-panel">
+          <div class="panel-header">
+            <h3 class="panel-title">💉 Vaccination Schedule & Immunization Records</h3>
+            <button class="btn btn-primary" onclick="openAdministerVaccineModal()">+ Record Vaccine</button>
+          </div>
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Pet</th>
+                  <th>Vaccine Name</th>
+                  <th>Batch / Lot</th>
+                  <th>Administered</th>
+                  <th>Next Due Date</th>
+                  <th>Status</th>
+                  <th>Veterinarian</th>
+                </tr>
+              </thead>
+              <tbody id="vaccinations-table-body">
+                <!-- Dynamically Populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 6: SPRING AI ADVISOR -->
+      <section id="tab-ai-advisor" class="tab-page" style="display: none;">
+        <div class="ai-assistant-container">
+          <div class="glass-panel">
+            <h3 class="panel-title" style="margin-bottom: 1.25rem;">🤖 Spring AI Symptom & Triage Evaluator</h3>
+            <form id="ai-advisor-form" onsubmit="handleAiEvaluate(event)">
+              <div class="form-group">
+                <label>Pet Name</label>
+                <input type="text" id="ai-pet-name" class="form-control" placeholder="e.g. Max" value="Max">
+              </div>
+              <div class="form-group">
+                <label>Species *</label>
+                <select id="ai-species" class="form-control">
+                  <option value="Dog">Dog</option>
+                  <option value="Cat">Cat</option>
+                  <option value="Bird">Bird</option>
+                  <option value="Rabbit">Rabbit</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Breed & Age</label>
+                <input type="text" id="ai-breed" class="form-control" placeholder="Golden Retriever, 4 years" value="Golden Retriever, 4 years">
+              </div>
+              <div class="form-group">
+                <label>Weight (kg)</label>
+                <input type="number" step="0.1" id="ai-weight" class="form-control" value="28.5">
+              </div>
+              <div class="form-group">
+                <label>Observed Symptoms *</label>
+                <textarea id="ai-symptoms" class="form-control" placeholder="Describe symptoms, behavior changes, fever, appetite...">Persistent dry coughing, mild lethargy after exercise, normal appetite.</textarea>
+              </div>
+              <button type="submit" class="btn btn-primary" style="width: 100%;">🚀 Run Spring AI Triage Assessment</button>
+            </form>
+          </div>
+
+          <div class="glass-panel" id="ai-result-panel">
+            <h3 class="panel-title" style="margin-bottom: 1rem;">🩺 AI Assessment Report</h3>
+            <div id="ai-result-content">
+              <p style="color: var(--text-muted);">Submit pet symptoms on the left to generate real-time AI triage, dosage guidance, and care recommendations.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 7: ML RISK ENGINE -->
+      <section id="tab-ml-predictor" class="tab-page" style="display: none;">
+        <div class="ai-assistant-container">
+          <div class="glass-panel">
+            <h3 class="panel-title" style="margin-bottom: 1.25rem;">🧠 Machine Learning Pet Health Risk Engine</h3>
+            <div class="form-group">
+              <label>Select Pet to Analyze</label>
+              <select id="ml-pet-select" class="form-control" onchange="runMlAssessment(this.value)">
+                <!-- Dynamically loaded -->
+              </select>
+            </div>
+            <button class="btn btn-emerald" onclick="runMlAssessment(document.getElementById('ml-pet-select').value)" style="width: 100%; margin-top: 1rem;">
+              ⚡ Calculate Health Risk Score
+            </button>
+          </div>
+
+          <div class="glass-panel" id="ml-result-panel">
+            <h3 class="panel-title">📊 ML Predictive Risk Analysis</h3>
+            <div id="ml-result-content">
+              <div class="risk-meter-box">
+                <div>Health Risk Score</div>
+                <div class="risk-score-display" id="ml-score-val">--</div>
+                <div id="ml-level-badge" class="badge badge-info">Select a Pet</div>
+                <div class="risk-bar-track">
+                  <div class="risk-bar-fill" id="ml-risk-bar" style="width: 0%; background: var(--accent-primary);"></div>
+                </div>
+              </div>
+              <div id="ml-factors-list"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- MODALS -->
+  <div class="modal-overlay" id="generic-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="panel-title" id="modal-title">Action</h3>
+        <button class="modal-close" onclick="closeModal()">&times;</button>
+      </div>
+      <div id="modal-body"></div>
+    </div>
+  </div>
+
+  <!-- Application Script -->
+  <script src="app.js"></script>
+</body>
+</html>

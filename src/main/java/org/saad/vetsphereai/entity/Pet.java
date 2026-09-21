@@ -16,7 +16,7 @@ public class Pet {
     private String gender;
 
     @ManyToOne
-    @JoinColumn(name = "pet_owner_ id")
+    @JoinColumn(name = "pet_owner_id")
     private User owner;
     public Pet() {
     }

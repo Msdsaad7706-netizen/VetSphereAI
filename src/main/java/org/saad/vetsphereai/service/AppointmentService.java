@@ -4,13 +4,16 @@ import org.saad.vetsphereai.dto.AppointmentRequest;
 import org.saad.vetsphereai.dto.AppointmentResponse;
 import org.saad.vetsphereai.dto.AppointmentStatusRequest;
 import org.saad.vetsphereai.entity.Appointment;
-import org.saad.vetsphereai.entity.Pet;
 import org.saad.vetsphereai.entity.AppointmentStatus;
+import org.saad.vetsphereai.entity.Pet;
 import org.saad.vetsphereai.entity.Veterinarian;
+import org.saad.vetsphereai.exception.BadRequestException;
+import org.saad.vetsphereai.exception.ResourceNotFoundException;
 import org.saad.vetsphereai.repository.AppointmentRepository;
 import org.saad.vetsphereai.repository.PetRepository;
 import org.saad.vetsphereai.repository.VeterinarianRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -31,85 +34,73 @@ public class AppointmentService {
         this.veterinarianRepository = veterinarianRepository;
     }
 
+    @Transactional
     public AppointmentResponse bookAppointment(AppointmentRequest request) {
 
         Pet pet = petRepository.findById(request.getPetId())
-                .orElseThrow(() -> new RuntimeException("Pet not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Pet not found with ID: " + request.getPetId()));
 
         Veterinarian veterinarian = veterinarianRepository.findById(request.getVeterinarianId())
-                .orElseThrow(() -> new RuntimeException("Veterinarian not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Veterinarian not found with ID: " + request.getVeterinarianId()));
 
         Appointment appointment = new Appointment();
-
         appointment.setPet(pet);
         appointment.setVeterinarian(veterinarian);
         appointment.setAppointmentDateTime(request.getAppointmentDateTime());
         appointment.setStatus(AppointmentStatus.PENDING);
 
         Appointment savedAppointment = appointmentRepository.save(appointment);
-
-        return AppointmentResponse.builder()
-                .id(savedAppointment.getId())
-                .petId(savedAppointment.getPet().getId())
-                .petName(savedAppointment.getPet().getName())
-                .veterinarianId(savedAppointment.getVeterinarian().getId())
-                .veterinarianName(savedAppointment.getVeterinarian().getFullName())
-                .appointmentDateTime(savedAppointment.getAppointmentDateTime())
-                .status(savedAppointment.getStatus())
-                .build();
+        return mapToResponse(savedAppointment);
     }
 
-    public AppointmentResponse getAppointmentById(Long id){
-        Appointment appointment = appointmentRepository.findById(id).orElseThrow(()-> new RuntimeException("Appointment not found"));
-        return
-                AppointmentResponse.builder()
-                        .id(appointment.getId())
-                        .petId(appointment.getPet().getId())
-                        .petName(appointment.getPet().getName())
-                        .veterinarianId(appointment.getVeterinarian().getId())
-                        .veterinarianName(appointment.getVeterinarian().getFullName())
-                        .appointmentDateTime(appointment.getAppointmentDateTime())
-                        .status(appointment.getStatus())
-                        .build();
+    @Transactional(readOnly = true)
+    public AppointmentResponse getAppointmentById(Long id) {
+        Appointment appointment = appointmentRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Appointment not found with ID: " + id));
+        return mapToResponse(appointment);
     }
-    public List<AppointmentResponse> getAllAppointments(){
-        return
-                appointmentRepository.findAll()
-                        .stream()
-                        .map(appointment -> AppointmentResponse.builder()
-                                .id(appointment.getId())
-                                .petId(appointment.getPet().getId())
-                                .petName(appointment.getPet().getName())
-                                .veterinarianId(appointment.getVeterinarian().getId())
-                                .veterinarianName(appointment.getVeterinarian().getFullName())
-                                .appointmentDateTime(appointment.getAppointmentDateTime())
-                                .status(appointment.getStatus())
-                                .build())
-                        .toList();
+
+    @Transactional(readOnly = true)
+    public List<AppointmentResponse> getAllAppointments() {
+        return appointmentRepository.findAll()
+                .stream()
+                .map(this::mapToResponse)
+                .toList();
     }
-    
-    public AppointmentResponse updateAppointmentStatus(Long id, AppointmentStatusRequest request){
-        Appointment appointment = appointmentRepository.findById(id).orElseThrow(()-> new RuntimeException("Appointment not found"));
-//        appointment.setStatus(request.getStatus());
+
+    @Transactional
+    public AppointmentResponse updateAppointmentStatus(Long id, AppointmentStatusRequest request) {
+        Appointment appointment = appointmentRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Appointment not found with ID: " + id));
 
         AppointmentStatus status;
-        try{
-            status =AppointmentStatus.valueOf(request.getStatus().toUpperCase());
-        } catch (IllegalArgumentException e)
-        {
-            throw new RuntimeException("Invalid appointment status");
+        try {
+            status = AppointmentStatus.valueOf(request.getStatus().toUpperCase());
+        } catch (IllegalArgumentException | NullPointerException e) {
+            throw new BadRequestException("Invalid appointment status: " + request.getStatus());
         }
 
         appointment.setStatus(status);
-        
         Appointment updatedAppointment = appointmentRepository.save(appointment);
-        return AppointmentResponse.builder()
-                .id(updatedAppointment.getId()).petId(updatedAppointment.getPet().getId()).petName(updatedAppointment.getPet().getName()).veterinarianId(updatedAppointment.getVeterinarian().getId()).veterinarianName(updatedAppointment.getVeterinarian().getFullName()).appointmentDateTime(updatedAppointment.getAppointmentDateTime()).status(updatedAppointment.getStatus())
-                .build();
+        return mapToResponse(updatedAppointment);
     }
 
-    public void deleteAppointment(Long id){
-        Appointment appointment = appointmentRepository.findById(id).orElseThrow(()-> new RuntimeException("Appointment not found"));
+    @Transactional
+    public void deleteAppointment(Long id) {
+        Appointment appointment = appointmentRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Appointment not found with ID: " + id));
         appointmentRepository.delete(appointment);
+    }
+
+    private AppointmentResponse mapToResponse(Appointment appointment) {
+        return AppointmentResponse.builder()
+                .id(appointment.getId())
+                .petId(appointment.getPet().getId())
+                .petName(appointment.getPet().getName())
+                .veterinarianId(appointment.getVeterinarian().getId())
+                .veterinarianName(appointment.getVeterinarian().getFullName())
+                .appointmentDateTime(appointment.getAppointmentDateTime())
+                .status(appointment.getStatus() != null ? appointment.getStatus().name() : "PENDING")
+                .build();
     }
 }

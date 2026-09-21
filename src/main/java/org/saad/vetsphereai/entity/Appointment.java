@@ -1,7 +1,6 @@
 package org.saad.vetsphereai.entity;
 
 import jakarta.persistence.*;
-
 import java.time.LocalDateTime;
 
 @Entity
@@ -14,10 +13,8 @@ public class Appointment {
 
     private LocalDateTime appointmentDateTime;
 
-    private String status;
-    
     @Enumerated(EnumType.STRING)
-    private AppointmentStatus statuss;
+    private AppointmentStatus status = AppointmentStatus.PENDING;
 
     @ManyToOne
     @JoinColumn(name = "pet_id")
@@ -46,12 +43,22 @@ public class Appointment {
         this.appointmentDateTime = appointmentDateTime;
     }
 
-    public String getStatus() {
+    public AppointmentStatus getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(AppointmentStatus status) {
         this.status = status;
+    }
+
+    public void setStatus(String statusStr) {
+        if (statusStr != null) {
+            try {
+                this.status = AppointmentStatus.valueOf(statusStr.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                this.status = AppointmentStatus.PENDING;
+            }
+        }
     }
 
     public Pet getPet() {
@@ -68,8 +75,5 @@ public class Appointment {
 
     public void setVeterinarian(Veterinarian veterinarian) {
         this.veterinarian = veterinarian;
-    }
-
-    public void setStatus(AppointmentStatus appointmentStatus) {
     }
 }
