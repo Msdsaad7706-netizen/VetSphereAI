@@ -2,7 +2,7 @@
    VetSphereAI Frontend Application Controller
    ========================================================================== */
 
-const API_BASE = 'http://localhost:8080/api';
+const API_BASE = 'https://vetsphereai-backend.onrender.com/api';
 let jwtToken = localStorage.getItem('vetsphere_jwt') || '';
 let currentUser = JSON.parse(localStorage.getItem('vetsphere_user') || 'null');
 
